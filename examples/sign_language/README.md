@@ -35,16 +35,43 @@ sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b path-to-env/
 ## Error handling
 Environment issues
 
+
 ```
 AttributeError: module 'importlib_resources' has no attribute 'is_resource'
 ```
 * Referring to [this link](https://github.com/facebookresearch/fairseq/issues/5289), ```pip install --upgrade hydra-core omegaconf``` can solve the problem.
 * Ignore conflicts from other packages. For testing environment, you should not upgrade aforementioned two packages. We recommend you to make a new environment for the inference.
 
+
 ```
 ImportError: numpy.core.multiarray failed to import
 ```
 * Referring to [this link](https://github.com/pytorch/pytorch/issues/42441), the error occurs because of incomplete numpy installation. Reinstall numpy with pip.
+```
+THC/THC.h : No such file or directory
+```
+* In fairseq/clib/libnat_cuda/edit_dist.cu, replace #include <THC/THC.h> with
+#include <ATen/cuda/CUDAContext.h>
+#include <ATen/cuda/CUDAEvent.h>
+Then install and build fairseq
+
+
+
+
+## Points to note
+
+* Additional installations: pose-format,truecase
+* The data folder needs to be in examples/sign_language. The same applies for the final_models folder
+* While running scripts/analyze_fairseq_generate.py, generate-dir should be set to final_models so that the code is able to access the correct output files from the experiment.
+* In the .env file, it's necessary to specify DATA_DIR and SAVE_DIR, otherwise the generate script does not run
+* In fairseq/data/sign_features_dataset.py, the path is hardcoded. This path needs to be changed to the user's data directory.
+```
+elif file.startswith('/home/usuaris/imatge/ltarres/wicv2023/'):
+                file = file.split('/i3d_features/')[-1]
+                file = "path_to_data/how2sign/i3d_features/" + file
+```
+* In scripts/analyze_fairseq_generate.py, make sure to change the config.data to the right folder
+
 
 
 ## Downloading the data
